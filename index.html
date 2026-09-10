@@ -1,0 +1,1035 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>POS Fonda Monte Patria 2026</title>
+    <style>
+        :root {
+            --bg-color: #121212;
+            --card-bg: #1e1e1e;
+            --accent-blue: #007bff;
+            --accent-green: #28a745;
+            --accent-red: #dc3545;
+            --accent-orange: #fd7e14;
+            --accent-gold: #ffc107;
+            --text-color: #ffffff;
+            --text-muted: #aaa;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            touch-action: manipulation;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            color: var(--text-color);
+            padding: 10px;
+            max-width: 500px;
+            margin: 0 auto;
+        }
+
+        /* Navegación por Pestañas */
+        .tabs {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+            overflow-x: auto;
+        }
+
+        .tab-btn {
+            flex: 1;
+            padding: 10px 4px;
+            background: var(--card-bg);
+            border: 1px solid #333;
+            color: var(--text-muted);
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            white-space: nowrap;
+        }
+
+        .tab-btn.active {
+            background: var(--accent-blue);
+            color: #fff;
+            border-color: var(--accent-blue);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* CUADRO DE RESUMEN DIARIO EN POS */
+        .daily-summary-box {
+            background: linear-gradient(135deg, #1b2e1e 0%, #1e1e1e 100%);
+            border: 1px solid var(--accent-green);
+            border-radius: 12px;
+            padding: 12px 15px;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .summary-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .summary-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .summary-value {
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--accent-green);
+        }
+
+        .summary-value.units {
+            color: var(--accent-gold);
+        }
+
+        /* MÓDULO CALCULADORA / POS */
+        .display-panel {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 10px;
+            border: 1px solid #333;
+        }
+
+        .current-sale-list {
+            min-height: 70px;
+            max-height: 110px;
+            overflow-y: auto;
+            border-bottom: 1px solid #333;
+            padding-bottom: 8px;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+
+        .sale-item-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 4px;
+        }
+
+        .total-display {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: var(--accent-green);
+        }
+
+        /* Selector de Método de Pago */
+        .payment-method-selector {
+            display: flex;
+            gap: 5px;
+            margin-bottom: 10px;
+        }
+
+        .pay-method-btn {
+            flex: 1;
+            padding: 10px 2px;
+            background: var(--card-bg);
+            border: 1px solid #444;
+            color: var(--text-muted);
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        .pay-method-btn.active {
+            background: var(--accent-blue);
+            color: white;
+            border-color: var(--accent-blue);
+        }
+
+        /* Grilla de Botones (Calculadora) */
+        .product-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn-prod {
+            background: var(--card-bg);
+            border: 1px solid #444;
+            border-radius: 12px;
+            padding: 15px 10px;
+            color: white;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            min-height: 90px;
+        }
+
+        .btn-prod:active {
+            transform: scale(0.98);
+            background: #2a2a2a;
+        }
+
+        .btn-prod .title {
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .btn-prod .price {
+            color: var(--accent-green);
+            font-weight: bold;
+            font-size: 1rem;
+        }
+
+        .btn-prod .stock {
+            font-size: 0.8rem;
+            color: var(--text-muted);
+        }
+
+        .btn-prod.low-stock .stock {
+            color: var(--accent-red);
+            font-weight: bold;
+        }
+
+        .action-grid {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        .btn-action {
+            padding: 15px;
+            border: none;
+            border-radius: 10px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            cursor: pointer;
+            color: white;
+        }
+
+        .btn-clear { background: var(--accent-red); }
+        .btn-pay { background: var(--accent-green); }
+
+        /* REGISTRO POR MÉTODO DE PAGO EN POS */
+        .payment-breakdown-card {
+            background: var(--card-bg);
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 12px 15px;
+        }
+
+        .payment-breakdown-card h4 {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            margin-bottom: 8px;
+            border-bottom: 1px solid #333;
+            padding-bottom: 4px;
+        }
+
+        .breakdown-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            text-align: center;
+        }
+
+        .breakdown-item {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .breakdown-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+        }
+
+        .breakdown-val {
+            font-size: 0.95rem;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+
+        /* MÓDULO CONFIGURACIÓN Y FORMULARIOS */
+        .card {
+            background: var(--card-bg);
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #333;
+        }
+
+        .card h3 {
+            margin-bottom: 12px;
+            color: var(--accent-blue);
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
+            font-size: 1.1rem;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 12px;
+        }
+
+        .form-group label {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .form-group input, .form-group textarea {
+            padding: 10px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background: #121212;
+            color: white;
+            font-size: 0.95rem;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 10px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        .stock-input-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #2a2a2a;
+        }
+
+        .stock-controls {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .stock-controls input {
+            width: 70px;
+            padding: 8px;
+            border-radius: 6px;
+            border: 1px solid #444;
+            background: #121212;
+            color: white;
+            text-align: center;
+            font-size: 1rem;
+        }
+
+        .btn-delete-prod {
+            background: var(--accent-red);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 12px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        /* REPORTE */
+        .report-summary {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
+        }
+
+        .report-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+
+        .report-table th, .report-table td {
+            padding: 8px;
+            text-align: left;
+            border-bottom: 1px solid #333;
+        }
+
+        .report-table th {
+            color: var(--text-muted);
+        }
+
+        .alert-box {
+            background: #3a2000;
+            border: 1px solid var(--accent-orange);
+            color: #ffcc80;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+        }
+
+        .btn-danger-light {
+            background: transparent;
+            border: 1px solid var(--accent-red);
+            color: var(--accent-red);
+            padding: 8px;
+            border-radius: 6px;
+            width: 100%;
+            margin-top: 15px;
+            cursor: pointer;
+        }
+
+        /* ESTILOS EXCLUSIVOS PARA IMPRESIÓN DE BOLETA SEGÚN LEGISLACIÓN CHILENA */
+        @media print {
+            body * {
+                visibility: hidden;
+            }
+            #receipt-print-area, #receipt-print-area * {
+                visibility: visible;
+            }
+            #receipt-print-area {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                max-width: 80mm;
+                color: black;
+                background: white;
+                font-family: 'Courier New', Courier, monospace;
+                padding: 5px;
+                font-size: 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navegación -->
+    <div class="tabs">
+        <button class="tab-btn active" onclick="switchTab('pos')">📱 Venta (POS)</button>
+        <button class="tab-btn" onclick="switchTab('stock')">📦 Inventario</button>
+        <button class="tab-btn" onclick="switchTab('receipt-cfg')">⚙️ Config. Boleta</button>
+        <button class="tab-btn" onclick="switchTab('report')">📊 Reporte</button>
+    </div>
+
+    <!-- PESTAÑA 1: CALCULADORA DE VENTAS -->
+    <div id="tab-pos" class="tab-content active">
+        <div class="daily-summary-box">
+            <div class="summary-item">
+                <span class="summary-label">Total Vendido Hoy</span>
+                <span id="pos-total-revenue" class="summary-value">$0</span>
+            </div>
+            <div class="summary-item" style="text-align: right;">
+                <span class="summary-label">Items Vendidos</span>
+                <span id="pos-total-units" class="summary-value units">0 u.</span>
+            </div>
+        </div>
+
+        <div class="display-panel">
+            <div id="current-sale" class="current-sale-list">
+                <span style="color: var(--text-muted);">Selecciona productos...</span>
+            </div>
+            <div class="total-display">
+                <span>A COBRAR:</span>
+                <span id="sale-total">$0</span>
+            </div>
+        </div>
+
+        <!-- Selector de Método de Pago -->
+        <div class="payment-method-selector">
+            <button class="pay-method-btn active" onclick="setPaymentMethod('cash')" id="pay-btn-cash">💵 Efectivo</button>
+            <button class="pay-method-btn" onclick="setPaymentMethod('card')" id="pay-btn-card">💳 Tarjeta</button>
+            <button class="pay-method-btn" onclick="setPaymentMethod('transfer')" id="pay-btn-transfer">📱 Transf.</button>
+        </div>
+
+        <div id="product-buttons" class="product-grid">
+            <!-- Botones dinámicos creados desde el Inventario -->
+        </div>
+
+        <div class="action-grid">
+            <button class="btn-action btn-clear" onclick="clearCurrentSale()">Borrar</button>
+            <button class="btn-action btn-pay" onclick="completeSale()">COBRAR</button>
+        </div>
+
+        <!-- Registro por Separado de Ventas por Método de Pago -->
+        <div class="payment-breakdown-card">
+            <h4>Registro de Ventas por Forma de Pago</h4>
+            <div class="breakdown-grid">
+                <div class="breakdown-item">
+                    <span class="breakdown-label">💵 Efectivo</span>
+                    <span id="breakdown-cash" class="breakdown-val">$0</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">💳 Tarjeta</span>
+                    <span id="breakdown-card" class="breakdown-val">$0</span>
+                </div>
+                <div class="breakdown-item">
+                    <span class="breakdown-label">📱 Transf.</span>
+                    <span id="breakdown-transfer" class="breakdown-val">$0</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- PESTAÑA 2: CONTROL Y GESTIÓN DE INVENTARIO -->
+    <div id="tab-stock" class="tab-content">
+        <div class="card">
+            <h3>➕ Agregar Nuevo Producto</h3>
+            <div class="form-group">
+                <label>Nombre del producto</label>
+                <input type="text" id="new-prod-name" placeholder="ej: Terremoto, Piscola, Empanada">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Precio ($)</label>
+                    <input type="number" id="new-prod-price" placeholder="4000" min="0">
+                </div>
+                <div class="form-group">
+                    <label>Stock inicial</label>
+                    <input type="number" id="new-prod-stock" placeholder="50" min="0">
+                </div>
+            </div>
+            <button class="btn-action btn-pay" style="width: 100%;" onclick="addNewProduct()">Crear Producto y Botón POS</button>
+        </div>
+
+        <div class="card">
+            <h3>📦 Stock Actual y Eliminación</h3>
+            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">
+                Modifica el stock o elimina productos de la carta.
+            </p>
+            <div id="stock-inputs">
+                <!-- Lista de productos con inputs y botón eliminar -->
+            </div>
+            <button class="btn-action btn-pay" style="width: 100%; margin-top: 10px;" onclick="saveStockInputs()">Guardar Cambios de Stock</button>
+        </div>
+    </div>
+
+    <!-- PESTAÑA 3: CONFIGURACIÓN DE BOLETA (NORMATIVA CHILENA / SII) -->
+    <div id="tab-receipt-cfg" class="tab-content">
+        <div class="card">
+            <h3>📜 Datos Tributarios de la Boleta</h3>
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 12px;">
+                Información exigida para emisión de boletas en Chile (Resolución SII).
+            </p>
+            <div class="form-group">
+                <label>Razón Social / Nombre Comercial</label>
+                <input type="text" id="cfg-business-name" placeholder="Fonda Los Guapos SpA">
+            </div>
+            <div class="form-group">
+                <label>RUT Emisor</label>
+                <input type="text" id="cfg-rut" placeholder="76.123.456-7">
+            </div>
+            <div class="form-group">
+                <label>Giro o Actividad Económica</label>
+                <input type="text" id="cfg-giro" placeholder="Servicios de Comida y Bebida / Fonda">
+            </div>
+            <div class="form-group">
+                <label>Dirección / Sucursal</label>
+                <input type="text" id="cfg-address" placeholder="Av. Principal #123, Monte Patria">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Comuna / Ciudad</label>
+                    <input type="text" id="cfg-city" placeholder="Monte Patria">
+                </div>
+                <div class="form-group">
+                    <label>Próximo N° Boleta</label>
+                    <input type="number" id="cfg-next-folio" placeholder="1" min="1">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Mensaje al pie (Opcional)</label>
+                <textarea id="cfg-footer-msg" rows="2" placeholder="¡Gracias por celebrar con nosotros! Viva Chile."></textarea>
+            </div>
+            <button class="btn-action btn-pay" style="width: 100%;" onclick="saveReceiptConfig()">Guardar Datos de la Boleta</button>
+        </div>
+    </div>
+
+    <!-- PESTAÑA 4: REPORTE DIARIO Y REPOSICIÓN -->
+    <div id="tab-report" class="tab-content">
+        <div class="card">
+            <h3>Resumen de Ventas</h3>
+            <div class="report-summary">
+                <strong>Total Recaudado: </strong><span id="total-revenue" style="color: var(--accent-green);">$0</span>
+            </div>
+            <table class="report-table">
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Vendidos</th>
+                        <th>Quedan</th>
+                    </tr>
+                </thead>
+                <tbody id="report-body">
+                    <!-- Filas dinámicas -->
+                </tbody>
+            </table>
+        </div>
+
+        <div class="card">
+            <h3>Sugerencia de Compras (Mañana)</h3>
+            <div id="shopping-recommendations">
+                <!-- Diagnóstico automático -->
+            </div>
+        </div>
+
+        <button class="btn-danger-light" onclick="resetAllData()">⚠️ Reiniciar Todos los Datos de la Fonda</button>
+    </div>
+
+    <!-- ÁREA OCULTA PARA IMPRESIÓN DE BOLETA EN EFECTIVO -->
+    <div id="receipt-print-area" style="display: none;"></div>
+
+    <script>
+        const defaultProducts = [
+            { id: 'terremoto', name: 'Terremoto', price: 4000, stock: 50, sold: 0 },
+            { id: 'piscola', name: 'Piscola / Destilado', price: 4500, stock: 40, sold: 0 },
+            { id: 'cerveza', name: 'Cerveza', price: 2500, stock: 60, sold: 0 },
+            { id: 'chicha', name: 'Chicha / Navegado', price: 3000, stock: 30, sold: 0 }
+        ];
+
+        const defaultReceiptConfig = {
+            businessName: 'FONDA MONTE PATRIA',
+            rut: '12.345.678-K',
+            giro: 'VENTA DE COMIDAS Y BEBIDAS EN FONDAS',
+            address: 'Plaza de Armas S/N',
+            city: 'Monte Patria',
+            nextFolio: 1,
+            footerMsg: '¡Gracias por su preferencia!'
+        };
+
+        let products = [];
+        let currentCart = [];
+        let receiptConfig = {};
+
+        // Registro acumulado por tipo de pago
+        let salesByPayment = {
+            cash: 0,
+            card: 0,
+            transfer: 0
+        };
+
+        let selectedPaymentMethod = 'cash';
+
+        function initApp() {
+            // Cargar Inventario
+            const savedData = localStorage.getItem('fonda_pos_data');
+            if (savedData) {
+                products = JSON.parse(savedData);
+            } else {
+                products = JSON.parse(JSON.stringify(defaultProducts));
+            }
+
+            // Cargar Registro de Pagos
+            const savedPaymentSales = localStorage.getItem('fonda_pos_payments');
+            if (savedPaymentSales) {
+                salesByPayment = JSON.parse(savedPaymentSales);
+            }
+
+            // Cargar Configuración de Boleta
+            const savedReceiptCfg = localStorage.getItem('fonda_pos_receipt_cfg');
+            if (savedReceiptCfg) {
+                receiptConfig = JSON.parse(savedReceiptCfg);
+            } else {
+                receiptConfig = { ...defaultReceiptConfig };
+            }
+
+            saveData();
+            loadReceiptConfigInputs();
+            updateDailySummary();
+            renderPOS();
+            renderStockInputs();
+            renderReport();
+        }
+
+        function saveData() {
+            localStorage.setItem('fonda_pos_data', JSON.stringify(products));
+            localStorage.setItem('fonda_pos_payments', JSON.stringify(salesByPayment));
+            localStorage.setItem('fonda_pos_receipt_cfg', JSON.stringify(receiptConfig));
+            updateDailySummary();
+        }
+
+        // CARGAR CAMPOS DE EDICIÓN DE BOLETA
+        function loadReceiptConfigInputs() {
+            document.getElementById('cfg-business-name').value = receiptConfig.businessName || '';
+            document.getElementById('cfg-rut').value = receiptConfig.rut || '';
+            document.getElementById('cfg-giro').value = receiptConfig.giro || '';
+            document.getElementById('cfg-address').value = receiptConfig.address || '';
+            document.getElementById('cfg-city').value = receiptConfig.city || '';
+            document.getElementById('cfg-next-folio').value = receiptConfig.nextFolio || 1;
+            document.getElementById('cfg-footer-msg').value = receiptConfig.footerMsg || '';
+        }
+
+        // GUARDAR DATOS DE LA BOLETA
+        function saveReceiptConfig() {
+            receiptConfig.businessName = document.getElementById('cfg-business-name').value.trim() || 'FONDA MONTE PATRIA';
+            receiptConfig.rut = document.getElementById('cfg-rut').value.trim() || 'S/RUT';
+            receiptConfig.giro = document.getElementById('cfg-giro').value.trim() || 'VENTA DE ALIMENTOS Y BEBIDAS';
+            receiptConfig.address = document.getElementById('cfg-address').value.trim() || 'Monte Patria';
+            receiptConfig.city = document.getElementById('cfg-city').value.trim() || 'Monte Patria';
+            receiptConfig.nextFolio = parseInt(document.getElementById('cfg-next-folio').value) || 1;
+            receiptConfig.footerMsg = document.getElementById('cfg-footer-msg').value.trim();
+
+            saveData();
+            alert('✅ Datos de la boleta actualizados correctamente.');
+        }
+
+        // SELECCIONAR MÉTODO DE PAGO
+        function setPaymentMethod(method) {
+            selectedPaymentMethod = method;
+            document.querySelectorAll('.pay-method-btn').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(`pay-btn-${method}`).classList.add('active');
+        }
+
+        function updateDailySummary() {
+            let totalMoney = 0;
+            let totalUnits = 0;
+
+            products.forEach(p => {
+                totalMoney += (p.sold * p.price);
+                totalUnits += p.sold;
+            });
+
+            document.getElementById('pos-total-revenue').innerText = `$${totalMoney.toLocaleString('es-CL')}`;
+            document.getElementById('pos-total-units').innerText = `${totalUnits} u.`;
+
+            document.getElementById('breakdown-cash').innerText = `$${salesByPayment.cash.toLocaleString('es-CL')}`;
+            document.getElementById('breakdown-card').innerText = `$${salesByPayment.card.toLocaleString('es-CL')}`;
+            document.getElementById('breakdown-transfer').innerText = `$${salesByPayment.transfer.toLocaleString('es-CL')}`;
+        }
+
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            
+            event.target.classList.add('active');
+            document.getElementById(`tab-${tabId}`).classList.add('active');
+
+            if(tabId === 'report') renderReport();
+        }
+
+        function addNewProduct() {
+            const nameInput = document.getElementById('new-prod-name');
+            const priceInput = document.getElementById('new-prod-price');
+            const stockInput = document.getElementById('new-prod-stock');
+
+            const name = nameInput.value.trim();
+            const price = parseInt(priceInput.value);
+            const stock = parseInt(stockInput.value) || 0;
+
+            if (!name || isNaN(price) || price <= 0) {
+                alert('⚠️ Ingrese un nombre y un precio válido.');
+                return;
+            }
+
+            const newId = 'prod_' + Date.now();
+
+            const newProduct = {
+                id: newId,
+                name: name,
+                price: price,
+                stock: stock,
+                sold: 0
+            };
+
+            products.push(newProduct);
+            saveData();
+
+            nameInput.value = '';
+            priceInput.value = '';
+            stockInput.value = '';
+
+            renderPOS();
+            renderStockInputs();
+            alert(`✅ ¡Producto "${name}" agregado correctamente!`);
+        }
+
+        function deleteProduct(prodId) {
+            const prod = products.find(p => p.id === prodId);
+            if (!prod) return;
+
+            if (confirm(`¿Eliminar "${prod.name}" de la oferta y borrar su botón de venta?`)) {
+                products = products.filter(p => p.id !== prodId);
+                currentCart = currentCart.filter(item => item.id !== prodId);
+                
+                saveData();
+                renderPOS();
+                renderStockInputs();
+                updateCartDisplay();
+            }
+        }
+
+        function renderPOS() {
+            const grid = document.getElementById('product-buttons');
+            grid.innerHTML = '';
+
+            if (products.length === 0) {
+                grid.innerHTML = '<p style="color: var(--text-muted); grid-column: span 2; text-align: center; padding: 20px;">No hay productos en la carta. Agrega algunos en la pestaña Inventario.</p>';
+                return;
+            }
+
+            products.forEach(p => {
+                const btn = document.createElement('button');
+                btn.className = `btn-prod ${p.stock <= 5 ? 'low-stock' : ''}`;
+                btn.onclick = () => addToCart(p.id);
+                btn.innerHTML = `
+                    <span class="title">${p.name}</span>
+                    <span class="price">$${p.price.toLocaleString('es-CL')}</span>
+                    <span class="stock">Disponibles: ${p.stock} u.</span>
+                `;
+                grid.appendChild(btn);
+            });
+        }
+
+        function addToCart(prodId) {
+            const prod = products.find(p => p.id === prodId);
+            const inCart = currentCart.filter(item => item.id === prodId).length;
+
+            if (prod.stock - inCart <= 0) {
+                alert(`¡Sin stock suficiente de ${prod.name}!`);
+                return;
+            }
+
+            currentCart.push(prod);
+            updateCartDisplay();
+        }
+
+        function updateCartDisplay() {
+            const container = document.getElementById('current-sale');
+            const totalEl = document.getElementById('sale-total');
+
+            if (currentCart.length === 0) {
+                container.innerHTML = '<span style="color: var(--text-muted);">Selecciona productos...</span>';
+                totalEl.innerText = '$0';
+                return;
+            }
+
+            const summary = {};
+            let total = 0;
+
+            currentCart.forEach(item => {
+                if (!summary[item.id]) {
+                    summary[item.id] = { name: item.name, qty: 0, subtotal: 0 };
+                }
+                summary[item.id].qty += 1;
+                summary[item.id].subtotal += item.price;
+                total += item.price;
+            });
+
+            container.innerHTML = '';
+            Object.values(summary).forEach(item => {
+                const row = document.createElement('div');
+                row.className = 'sale-item-row';
+                row.innerHTML = `
+                    <span>${item.qty}x ${item.name}</span>
+                    <span>$${item.subtotal.toLocaleString('es-CL')}</span>
+                `;
+                container.appendChild(row);
+            });
+
+            totalEl.innerText = `$${total.toLocaleString('es-CL')}`;
+        }
+
+        function clearCurrentSale() {
+            currentCart = [];
+            updateCartDisplay();
+        }
+
+        function completeSale() {
+            if (currentCart.length === 0) return;
+
+            let saleTotal = 0;
+            const summary = {};
+
+            currentCart.forEach(cartItem => {
+                const prod = products.find(p => p.id === cartItem.id);
+                if (prod) {
+                    prod.stock -= 1;
+                    prod.sold += 1;
+                    saleTotal += prod.price;
+
+                    if (!summary[prod.id]) {
+                        summary[prod.id] = { name: prod.name, qty: 0, price: prod.price };
+                    }
+                    summary[prod.id].qty += 1;
+                }
+            });
+
+            salesByPayment[selectedPaymentMethod] += saleTotal;
+
+            if (selectedPaymentMethod === 'cash') {
+                printReceipt(summary, saleTotal);
+                receiptConfig.nextFolio += 1; // Incrementar correlativo de boleta
+            } else {
+                alert(`✅ Venta cobrada con éxito (${selectedPaymentMethod.toUpperCase()})`);
+            }
+
+            saveData();
+            loadReceiptConfigInputs();
+            clearCurrentSale();
+            renderPOS();
+            renderStockInputs();
+        }
+
+        // IMPRESIÓN DE BOLETA SEGÚN FORMATO DE LEGISLACIÓN CHILENA
+        function printReceipt(summary, total) {
+            const receiptArea = document.getElementById('receipt-print-area');
+            const now = new Date();
+            const dateStr = now.toLocaleDateString('es-CL') + ' ' + now.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+
+            let receiptHTML = `
+                <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 6px; margin-bottom: 6px;">
+                    <h3 style="margin: 0; font-size: 1rem; font-weight: bold;">${receiptConfig.businessName.toUpperCase()}</h3>
+                    <p style="margin: 2px 0;">R.U.T.: ${receiptConfig.rut}</p>
+                    <p style="margin: 2px 0; font-size: 0.75rem;">GIRO: ${receiptConfig.giro}</p>
+                    <p style="margin: 2px 0; font-size: 0.75rem;">${receiptConfig.address}</p>
+                    <p style="margin: 2px 0; font-size: 0.75rem;">${receiptConfig.city}</p>
+                    <hr style="border: none; border-top: 1px dashed #000; margin: 4px 0;">
+                    <p style="font-weight: bold; margin: 2px 0;">BOLETA ELECTRÓNICA N° ${receiptConfig.nextFolio}</p>
+                    <p style="font-size: 0.75rem; margin: 0;">FECHA: ${dateStr}</p>
+                </div>
+
+                <div style="border-bottom: 1px dashed #000; padding-bottom: 6px; margin-bottom: 6px;">
+            `;
+
+            Object.values(summary).forEach(item => {
+                receiptHTML += `
+                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 2px;">
+                        <span>${item.qty} x ${item.name}</span>
+                        <span>$${(item.qty * item.price).toLocaleString('es-CL')}</span>
+                    </div>
+                `;
+            });
+
+            receiptHTML += `
+                </div>
+                <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 1rem; border-bottom: 1px dashed #000; padding-bottom: 6px; margin-bottom: 6px;">
+                    <span>TOTAL:</span>
+                    <span>$${total.toLocaleString('es-CL')}</span>
+                </div>
+
+                <div style="text-align: center; font-size: 0.7rem; margin-top: 6px;">
+                    <p style="font-weight: bold; margin-bottom: 4px;">El IVA de esta boleta está incluido en el precio</p>
+                    <p>${receiptConfig.footerMsg || ''}</p>
+                </div>
+            `;
+
+            receiptArea.innerHTML = receiptHTML;
+            receiptArea.style.display = 'block';
+
+            window.print();
+
+            setTimeout(() => {
+                receiptArea.style.display = 'none';
+            }, 500);
+        }
+
+        function renderStockInputs() {
+            const container = document.getElementById('stock-inputs');
+            container.innerHTML = '';
+
+            if (products.length === 0) {
+                container.innerHTML = '<p style="color: var(--text-muted); text-align: center;">No hay productos guardados.</p>';
+                return;
+            }
+
+            products.forEach(p => {
+                const row = document.createElement('div');
+                row.className = 'stock-input-row';
+                row.innerHTML = `
+                    <div>
+                        <strong>${p.name}</strong>
+                        <div style="font-size: 0.8rem; color: var(--text-muted);">$${p.price.toLocaleString('es-CL')}</div>
+                    </div>
+                    <div class="stock-controls">
+                        <input type="number" id="input-stock-${p.id}" value="${p.stock}" min="0">
+                        <button class="btn-delete-prod" onclick="deleteProduct('${p.id}')">🗑️</button>
+                    </div>
+                `;
+                container.appendChild(row);
+            });
+        }
+
+        function saveStockInputs() {
+            products.forEach(p => {
+                const input = document.getElementById(`input-stock-${p.id}`);
+                if (input) {
+                    p.stock = parseInt(input.value) || 0;
+                }
+            });
+            saveData();
+            renderPOS();
+            alert('📦 Stock actualizado correctamente');
+        }
+
+        function renderReport() {
+            const tbody = document.getElementById('report-body');
+            const totalRevEl = document.getElementById('total-revenue');
+            const recContainer = document.getElementById('shopping-recommendations');
+
+            tbody.innerHTML = '';
+            recContainer.innerHTML = '';
+
+            let totalRevenue = 0;
+            let criticalStockItems = [];
+
+            products.forEach(p => {
+                const revenue = p.sold * p.price;
+                totalRevenue += revenue;
+
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td><strong>${p.name}</strong></td>
+                    <td>${p.sold} u. ($${revenue.toLocaleString('es-CL')})</td>
+                    <td style="color: ${p.stock <= 5 ? 'var(--accent-red)' : 'white'}">${p.stock} u.</td>
+                `;
+                tbody.appendChild(row);
+
+                if (p.stock <= 10) {
+                    criticalStockItems.push(p);
+                }
+            });
+
+            totalRevEl.innerText = `$${totalRevenue.toLocaleString('es-CL')}`;
+
+            if (criticalStockItems.length === 0) {
+                recContainer.innerHTML = '<p style="color: var(--accent-green);">✅ Stock suficiente en todos los productos para continuar.</p>';
+            } else {
+                let html = '<div class="alert-box"><strong>⚡ Reposición recomendada para la siguiente jornada:</strong><ul style="margin-left: 15px; margin-top: 5px;">';
+                criticalStockItems.forEach(item => {
+                    html += `<li><strong>${item.name}:</strong> Quedan ${item.stock} u. Se han vendido ${item.sold} u.</li>`;
+                });
+                html += '</ul></div>';
+                recContainer.innerHTML = html;
+            }
+        }
+
+        function resetAllData() {
+            if (confirm('¿Estás seguro de reiniciar todos los datos? Esto borrará las ventas, datos de boletas y el inventario.')) {
+                localStorage.removeItem('fonda_pos_data');
+                localStorage.removeItem('fonda_pos_payments');
+                localStorage.removeItem('fonda_pos_receipt_cfg');
+                salesByPayment = { cash: 0, card: 0, transfer: 0 };
+                initApp();
+            }
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>
