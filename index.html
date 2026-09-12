@@ -394,33 +394,6 @@
             margin-top: 15px;
             cursor: pointer;
         }
-
-        /* ESTILOS OPTIMIZADOS PARA IMPRESORA TÉRMICA (UTUS / POS) */
-        @media print {
-            body * {
-                visibility: hidden;
-            }
-            #receipt-print-area, #receipt-print-area * {
-                visibility: visible;
-            }
-            #receipt-print-area {
-                position: absolute;
-                left: 0;
-                top: 0;
-                width: 100%;
-                max-width: 80mm; /* Compatible con rollos de 58mm y 80mm */
-                color: #000;
-                background: #fff;
-                font-family: 'Courier New', Courier, monospace;
-                padding: 1mm;
-                font-size: 11px;
-                line-height: 1.2;
-            }
-            @page {
-                size: auto; /* Ajuste automático al ancho del rollo de la impresora térmica */
-                margin: 0mm; /* Elimina márgenes blancos predeterminados del navegador */
-            }
-        }
     </style>
 </head>
 <body>
@@ -429,7 +402,6 @@
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('pos')">📱 Venta (POS)</button>
         <button class="tab-btn" onclick="switchTab('stock')">📦 Inventario</button>
-        <button class="tab-btn" onclick="switchTab('receipt-cfg')">⚙️ Config. Boleta</button>
         <button class="tab-btn" onclick="switchTab('report')">📊 Reporte</button>
     </div>
 
@@ -525,48 +497,7 @@
         </div>
     </div>
 
-    <!-- PESTAÑA 3: CONFIGURACIÓN DE BOLETA (NORMATIVA CHILENA / SII) -->
-    <div id="tab-receipt-cfg" class="tab-content">
-        <div class="card">
-            <h3>📜 Datos Tributarios de la Boleta</h3>
-            <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 12px;">
-                Información exigida para emisión de boletas en Chile (Resolución SII).
-            </p>
-            <div class="form-group">
-                <label>Razón Social / Nombre Comercial</label>
-                <input type="text" id="cfg-business-name" placeholder="Fonda Los Guapos SpA">
-            </div>
-            <div class="form-group">
-                <label>RUT Emisor</label>
-                <input type="text" id="cfg-rut" placeholder="76.123.456-7">
-            </div>
-            <div class="form-group">
-                <label>Giro o Actividad Económica</label>
-                <input type="text" id="cfg-giro" placeholder="Servicios de Comida y Bebida / Fonda">
-            </div>
-            <div class="form-group">
-                <label>Dirección / Sucursal</label>
-                <input type="text" id="cfg-address" placeholder="Av. Principal #123, Monte Patria">
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Comuna / Ciudad</label>
-                    <input type="text" id="cfg-city" placeholder="Monte Patria">
-                </div>
-                <div class="form-group">
-                    <label>Próximo N° Boleta</label>
-                    <input type="number" id="cfg-next-folio" placeholder="1" min="1">
-                </div>
-            </div>
-            <div class="form-group">
-                <label>Mensaje al pie (Opcional)</label>
-                <textarea id="cfg-footer-msg" rows="2" placeholder="¡Gracias por celebrar con nosotros! Viva Chile."></textarea>
-            </div>
-            <button class="btn-action btn-pay" style="width: 100%;" onclick="saveReceiptConfig()">Guardar Datos de la Boleta</button>
-        </div>
-    </div>
-
-    <!-- PESTAÑA 4: REPORTE DIARIO Y REPOSICIÓN -->
+    <!-- PESTAÑA 3: REPORTE DIARIO Y REPOSICIÓN -->
     <div id="tab-report" class="tab-content">
         <div class="card">
             <h3>Resumen de Ventas</h3>
@@ -597,9 +528,6 @@
         <button class="btn-danger-light" onclick="resetAllData()">⚠️ Reiniciar Todos los Datos de la Fonda</button>
     </div>
 
-    <!-- ÁREA OCULTA PARA IMPRESIÓN DE BOLETA CON RECORTABLE -->
-    <div id="receipt-print-area" style="display: none;"></div>
-
     <script>
         const defaultProducts = [
             { id: 'terremoto', name: 'Terremoto', price: 4000, stock: 50, sold: 0 },
@@ -608,19 +536,8 @@
             { id: 'chicha', name: 'Chicha / Navegado', price: 3000, stock: 30, sold: 0 }
         ];
 
-        const defaultReceiptConfig = {
-            businessName: 'FONDA MONTE PATRIA',
-            rut: '12.345.678-K',
-            giro: 'VENTA DE COMIDAS Y BEBIDAS EN FONDAS',
-            address: 'Plaza de Armas S/N',
-            city: 'Monte Patria',
-            nextFolio: 1,
-            footerMsg: '¡Gracias por su preferencia!'
-        };
-
         let products = [];
         let currentCart = [];
-        let receiptConfig = {};
 
         let salesByPayment = {
             cash: 0,
@@ -629,6 +546,7 @@
         };
 
         let selectedPaymentMethod = 'cash';
+        let ticketCounter = 1;
 
         function initApp() {
             const savedData = localStorage.getItem('fonda_pos_data');
@@ -643,15 +561,12 @@
                 salesByPayment = JSON.parse(savedPaymentSales);
             }
 
-            const savedReceiptCfg = localStorage.getItem('fonda_pos_receipt_cfg');
-            if (savedReceiptCfg) {
-                receiptConfig = JSON.parse(savedReceiptCfg);
-            } else {
-                receiptConfig = { ...defaultReceiptConfig };
+            const savedTicketCounter = localStorage.getItem('fonda_ticket_counter');
+            if (savedTicketCounter) {
+                ticketCounter = parseInt(savedTicketCounter) || 1;
             }
 
             saveData();
-            loadReceiptConfigInputs();
             updateDailySummary();
             renderPOS();
             renderStockInputs();
@@ -661,31 +576,8 @@
         function saveData() {
             localStorage.setItem('fonda_pos_data', JSON.stringify(products));
             localStorage.setItem('fonda_pos_payments', JSON.stringify(salesByPayment));
-            localStorage.setItem('fonda_pos_receipt_cfg', JSON.stringify(receiptConfig));
+            localStorage.setItem('fonda_ticket_counter', ticketCounter);
             updateDailySummary();
-        }
-
-        function loadReceiptConfigInputs() {
-            document.getElementById('cfg-business-name').value = receiptConfig.businessName || '';
-            document.getElementById('cfg-rut').value = receiptConfig.rut || '';
-            document.getElementById('cfg-giro').value = receiptConfig.giro || '';
-            document.getElementById('cfg-address').value = receiptConfig.address || '';
-            document.getElementById('cfg-city').value = receiptConfig.city || '';
-            document.getElementById('cfg-next-folio').value = receiptConfig.nextFolio || 1;
-            document.getElementById('cfg-footer-msg').value = receiptConfig.footerMsg || '';
-        }
-
-        function saveReceiptConfig() {
-            receiptConfig.businessName = document.getElementById('cfg-business-name').value.trim() || 'FONDA MONTE PATRIA';
-            receiptConfig.rut = document.getElementById('cfg-rut').value.trim() || 'S/RUT';
-            receiptConfig.giro = document.getElementById('cfg-giro').value.trim() || 'VENTA DE ALIMENTOS Y BEBIDAS';
-            receiptConfig.address = document.getElementById('cfg-address').value.trim() || 'Monte Patria';
-            receiptConfig.city = document.getElementById('cfg-city').value.trim() || 'Monte Patria';
-            receiptConfig.nextFolio = parseInt(document.getElementById('cfg-next-folio').value) || 1;
-            receiptConfig.footerMsg = document.getElementById('cfg-footer-msg').value.trim();
-
-            saveData();
-            alert('✅ Datos de la boleta actualizados correctamente.');
         }
 
         function setPaymentMethod(method) {
@@ -761,7 +653,7 @@
             const prod = products.find(p => p.id === prodId);
             if (!prod) return;
 
-            if (confirm(`¿Eliminar "${prod.name}" de la oferta y borrar seu botón de venta?`)) {
+            if (confirm(`¿Eliminar "${prod.name}" de la oferta y borrar su botón de venta?`)) {
                 products = products.filter(p => p.id !== prodId);
                 currentCart = currentCart.filter(item => item.id !== prodId);
                 
@@ -870,91 +762,94 @@
 
             salesByPayment[selectedPaymentMethod] += saleTotal;
 
-            if (selectedPaymentMethod === 'cash') {
-                printReceipt(summary, saleTotal);
-                receiptConfig.nextFolio += 1;
-            } else {
-                alert(`✅ Venta cobrada con éxito (${selectedPaymentMethod.toUpperCase()})`);
-            }
+            // Emite la colilla de retiro para CUALQUIER método de pago seleccionado
+            printKitchenReceipt(summary, saleTotal, selectedPaymentMethod);
+            ticketCounter += 1;
 
             saveData();
-            loadReceiptConfigInputs();
             clearCurrentSale();
             renderPOS();
             renderStockInputs();
         }
 
-        function printReceipt(summary, total) {
-            const receiptArea = document.getElementById('receipt-print-area');
+        function printKitchenReceipt(summary, total, paymentMethod) {
             const now = new Date();
             const dateStr = now.toLocaleDateString('es-CL') + ' ' + now.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
+            
+            const paymentNames = {
+                cash: 'EFECTIVO',
+                card: 'TARJETA',
+                transfer: 'TRANSFERENCIA'
+            };
 
-            let receiptHTML = `
-                <div style="text-align: center; border-bottom: 1px dashed #000; padding-bottom: 6px; margin-bottom: 6px;">
-                    <h3 style="margin: 0; font-size: 1rem; font-weight: bold;">${receiptConfig.businessName.toUpperCase()}</h3>
-                    <p style="margin: 2px 0;">R.U.T.: ${receiptConfig.rut}</p>
-                    <p style="margin: 2px 0; font-size: 0.75rem;">GIRO: ${receiptConfig.giro}</p>
-                    <p style="margin: 2px 0; font-size: 0.75rem;">${receiptConfig.address}</p>
-                    <p style="margin: 2px 0; font-size: 0.75rem;">${receiptConfig.city}</p>
-                    <hr style="border: none; border-top: 1px dashed #000; margin: 4px 0;">
-                    <p style="font-weight: bold; margin: 2px 0;">BOLETA ELECTRÓNICA N° ${receiptConfig.nextFolio}</p>
-                    <p style="font-size: 0.75rem; margin: 0;">FECHA: ${dateStr}</p>
-                </div>
-
-                <div style="border-bottom: 1px dashed #000; padding-bottom: 6px; margin-bottom: 6px;">
-            `;
-
+            let kitchenItemsHtml = '';
             Object.values(summary).forEach(item => {
-                receiptHTML += `
-                    <div style="display: flex; justify-content: space-between; font-size: 0.85rem; margin-bottom: 2px;">
-                        <span>${item.qty} x ${item.name}</span>
-                        <span>$${(item.qty * item.price).toLocaleString('es-CL')}</span>
+                kitchenItemsHtml += `
+                    <div style="font-size: 14px; font-weight: bold; margin-bottom: 5px;">
+                        [ ] ${item.qty} u. - ${item.name}
                     </div>
                 `;
             });
 
-            receiptHTML += `
-                </div>
-                <div style="display: flex; justify-content: space-between; font-weight: bold; font-size: 1rem; border-bottom: 1px dashed #000; padding-bottom: 6px; margin-bottom: 6px;">
-                    <span>TOTAL:</span>
-                    <span>$${total.toLocaleString('es-CL')}</span>
-                </div>
-
-                <div style="text-align: center; font-size: 0.7rem; margin-top: 6px; margin-bottom: 12px;">
-                    <p style="font-weight: bold; margin-bottom: 4px;">El IVA de esta boleta está incluido en el precio</p>
-                    <p>${receiptConfig.footerMsg || ''}</p>
-                </div>
-
-                <div style="border-top: 2px dashed #000; padding-top: 8px; margin-top: 10px; text-align: center;">
-                    <p style="font-size: 0.75rem; font-weight: bold; letter-spacing: 1px; margin-bottom: 4px;">✂️ COLILLA PARA RETIRO DE PRODUCTOS</p>
-                    <p style="font-weight: bold; font-size: 0.9rem; margin-bottom: 2px;">${receiptConfig.businessName.toUpperCase()}</p>
-                    <p style="font-size: 0.8rem; margin-bottom: 6px;">BOLETA N° ${receiptConfig.nextFolio} | ${dateStr}</p>
-                    
-                    <div style="border: 1px solid #000; padding: 6px; text-align: left; margin-top: 4px;">
-                        <p style="font-weight: bold; font-size: 0.8rem; border-bottom: 1px solid #000; padding-bottom: 2px; margin-bottom: 4px; text-align: center;">ENTREGAR EN BARRA / COCINA</p>
-            `;
-
-            Object.values(summary).forEach(item => {
-                receiptHTML += `
-                    <div style="font-size: 0.95rem; font-weight: bold; margin-bottom: 3px;">
-                        <span>[ ] ${item.qty} u. - ${item.name}</span>
+            const printWindow = window.open('', '_blank', 'width=350,height=600');
+            
+            printWindow.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Colilla de Retiro</title>
+                    <style>
+                        @page {
+                            size: 80mm auto;
+                            margin: 0;
+                        }
+                        body {
+                            font-family: 'Courier New', Courier, monospace;
+                            width: 72mm;
+                            margin: 0 auto;
+                            padding: 5px;
+                            color: #000;
+                            background: #fff;
+                            font-size: 11px;
+                            line-height: 1.2;
+                        }
+                        .center { text-align: center; }
+                        .bold { font-weight: bold; }
+                        .line { border-top: 1px dashed #000; margin: 5px 0; }
+                        .flex { display: flex; justify-content: space-between; }
+                        .box { border: 2px solid #000; padding: 8px; margin-top: 8px; }
+                    </style>
+                </head>
+                <body>
+                    <div class="center">
+                        <div class="bold" style="font-size: 13px;">FONDA MONTE PATRIA</div>
+                        <div class="bold" style="font-size: 12px; margin-top: 4px;">✂️ COLILLA DE RETIRO N° ${ticketCounter}</div>
+                        <div style="font-size: 10px; margin-top: 2px;">FECHA: ${dateStr}</div>
+                        <div style="font-size: 10px;">PAGO: ${paymentNames[paymentMethod]}</div>
                     </div>
-                `;
-            });
-
-            receiptHTML += `
+                    <div class="line"></div>
+                    <div class="box">
+                        <div class="bold center" style="border-bottom: 1px solid #000; padding-bottom: 3px; margin-bottom: 6px;">ENTREGAR EN BARRA / COCINA</div>
+                        ${kitchenItemsHtml}
                     </div>
-                </div>
-            `;
-
-            receiptArea.innerHTML = receiptHTML;
-            receiptArea.style.display = 'block';
-
-            window.print();
-
-            setTimeout(() => {
-                receiptArea.style.display = 'none';
-            }, 500);
+                    <div class="line"></div>
+                    <div class="flex bold" style="font-size: 12px;">
+                        <span>TOTAL PAGADO:</span>
+                        <span>$${total.toLocaleString('es-CL')}</span>
+                    </div>
+                    <div class="center" style="font-size: 10px; margin-top: 8px;">
+                        <div>¡Gracias por su preferencia!</div>
+                    </div>
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                            setTimeout(() => { window.close(); }, 500);
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `);
+            printWindow.document.close();
         }
 
         function renderStockInputs() {
@@ -1038,11 +933,12 @@
         }
 
         function resetAllData() {
-            if (confirm('¿Estás seguro de reiniciar todos los datos? Esto borrará las ventas, datos de boletas y el inventario.')) {
+            if (confirm('¿Estás seguro de reiniciar todos los datos? Esto borrará las ventas, contadores y el inventario.')) {
                 localStorage.removeItem('fonda_pos_data');
                 localStorage.removeItem('fonda_pos_payments');
-                localStorage.removeItem('fonda_pos_receipt_cfg');
+                localStorage.removeItem('fonda_ticket_counter');
                 salesByPayment = { cash: 0, card: 0, transfer: 0 };
+                ticketCounter = 1;
                 initApp();
             }
         }
