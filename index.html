@@ -28,8 +28,8 @@
         body {
             background-color: var(--bg-color);
             color: var(--text-color);
-            padding: 10px;
-            max-width: 500px;
+            padding: 8px;
+            max-width: 600px;
             margin: 0 auto;
         }
 
@@ -37,13 +37,13 @@
         .tabs {
             display: flex;
             gap: 5px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
             overflow-x: auto;
         }
 
         .tab-btn {
             flex: 1;
-            padding: 10px 4px;
+            padding: 8px 4px;
             background: var(--card-bg);
             border: 1px solid #333;
             color: var(--text-muted);
@@ -72,9 +72,9 @@
         .daily-summary-box {
             background: linear-gradient(135deg, #1b2e1e 0%, #1e1e1e 100%);
             border: 1px solid var(--accent-green);
-            border-radius: 12px;
-            padding: 12px 15px;
-            margin-bottom: 10px;
+            border-radius: 10px;
+            padding: 8px 12px;
+            margin-bottom: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -86,14 +86,14 @@
         }
 
         .summary-label {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--text-muted);
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
 
         .summary-value {
-            font-size: 1.3rem;
+            font-size: 1.1rem;
             font-weight: bold;
             color: var(--accent-green);
         }
@@ -105,33 +105,33 @@
         /* MÓDULO CALCULADORA / POS */
         .display-panel {
             background: var(--card-bg);
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 10px;
+            padding: 10px 12px;
+            border-radius: 10px;
+            margin-bottom: 8px;
             border: 1px solid #333;
         }
 
         .current-sale-list {
-            min-height: 70px;
-            max-height: 110px;
+            min-height: 45px;
+            max-height: 80px;
             overflow-y: auto;
             border-bottom: 1px solid #333;
-            padding-bottom: 8px;
-            margin-bottom: 8px;
-            font-size: 0.95rem;
+            padding-bottom: 6px;
+            margin-bottom: 6px;
+            font-size: 0.85rem;
         }
 
         .sale-item-row {
             display: flex;
             justify-content: space-between;
-            margin-bottom: 4px;
+            margin-bottom: 3px;
         }
 
         .total-display {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            font-size: 1.4rem;
+            font-size: 1.2rem;
             font-weight: bold;
             color: var(--accent-green);
         }
@@ -140,18 +140,18 @@
         .payment-method-selector {
             display: flex;
             gap: 5px;
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .pay-method-btn {
             flex: 1;
-            padding: 10px 2px;
+            padding: 8px 2px;
             background: var(--card-bg);
             border: 1px solid #444;
             color: var(--text-muted);
             border-radius: 8px;
             font-weight: bold;
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             cursor: pointer;
         }
 
@@ -161,26 +161,26 @@
             border-color: var(--accent-blue);
         }
 
-        /* Grilla de Botones (Calculadora) */
+        /* Grilla de Botones en 3 Columnas */
         .product-grid {
             display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 10px;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-bottom: 8px;
         }
 
         .btn-prod {
             background: var(--card-bg);
             border: 1px solid #444;
-            border-radius: 12px;
-            padding: 15px 10px;
+            border-radius: 10px;
+            padding: 10px 6px;
             color: white;
             text-align: left;
             cursor: pointer;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            min-height: 90px;
+            min-height: 80px;
         }
 
         .btn-prod:active {
@@ -190,17 +190,23 @@
 
         .btn-prod .title {
             font-weight: bold;
-            font-size: 1.1rem;
+            font-size: 0.9rem;
+            line-height: 1.15;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
         }
 
         .btn-prod .price {
             color: var(--accent-green);
             font-weight: bold;
-            font-size: 1rem;
+            font-size: 0.9rem;
+            margin-top: 4px;
         }
 
         .btn-prod .stock {
-            font-size: 0.8rem;
+            font-size: 0.7rem;
             color: var(--text-muted);
         }
 
@@ -212,16 +218,16 @@
         .action-grid {
             display: grid;
             grid-template-columns: 1fr 2fr;
-            gap: 10px;
-            margin-bottom: 15px;
+            gap: 8px;
+            margin-bottom: 8px;
         }
 
         .btn-action {
-            padding: 15px;
+            padding: 12px;
             border: none;
-            border-radius: 10px;
+            border-radius: 8px;
             font-weight: bold;
-            font-size: 1.1rem;
+            font-size: 1rem;
             cursor: pointer;
             color: white;
         }
@@ -233,23 +239,23 @@
         .payment-breakdown-card {
             background: var(--card-bg);
             border: 1px solid #333;
-            border-radius: 12px;
-            padding: 12px 15px;
+            border-radius: 10px;
+            padding: 8px 12px;
         }
 
         .payment-breakdown-card h4 {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
             text-transform: uppercase;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
             border-bottom: 1px solid #333;
-            padding-bottom: 4px;
+            padding-bottom: 3px;
         }
 
         .breakdown-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
+            gap: 6px;
             text-align: center;
         }
 
@@ -259,12 +265,12 @@
         }
 
         .breakdown-label {
-            font-size: 0.75rem;
+            font-size: 0.7rem;
             color: var(--text-muted);
         }
 
         .breakdown-val {
-            font-size: 0.95rem;
+            font-size: 0.9rem;
             font-weight: bold;
             color: var(--text-color);
         }
@@ -272,44 +278,44 @@
         /* MÓDULO CONFIGURACIÓN Y FORMULARIOS */
         .card {
             background: var(--card-bg);
-            padding: 15px;
-            border-radius: 12px;
-            margin-bottom: 15px;
+            padding: 12px;
+            border-radius: 10px;
+            margin-bottom: 12px;
             border: 1px solid #333;
         }
 
         .card h3 {
-            margin-bottom: 12px;
+            margin-bottom: 10px;
             color: var(--accent-blue);
             border-bottom: 1px solid #333;
-            padding-bottom: 5px;
-            font-size: 1.1rem;
+            padding-bottom: 4px;
+            font-size: 1rem;
         }
 
         .form-group {
             display: flex;
             flex-direction: column;
-            gap: 6px;
-            margin-bottom: 12px;
+            gap: 4px;
+            margin-bottom: 10px;
         }
 
         .form-group label {
-            font-size: 0.85rem;
+            font-size: 0.8rem;
             color: var(--text-muted);
         }
 
         .form-group input, .form-group textarea {
-            padding: 10px;
+            padding: 8px;
             border-radius: 6px;
             border: 1px solid #444;
             background: #121212;
             color: white;
-            font-size: 0.95rem;
+            font-size: 0.9rem;
         }
 
         .form-row {
             display: flex;
-            gap: 10px;
+            gap: 8px;
         }
 
         .form-row .form-group {
@@ -320,26 +326,26 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
-            padding-bottom: 8px;
+            margin-bottom: 10px;
+            padding-bottom: 6px;
             border-bottom: 1px solid #2a2a2a;
         }
 
         .stock-controls {
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
         }
 
         .stock-controls input {
-            width: 70px;
-            padding: 8px;
+            width: 60px;
+            padding: 6px;
             border-radius: 6px;
             border: 1px solid #444;
             background: #121212;
             color: white;
             text-align: center;
-            font-size: 1rem;
+            font-size: 0.9rem;
         }
 
         .btn-delete-prod {
@@ -347,25 +353,25 @@
             color: white;
             border: none;
             border-radius: 6px;
-            padding: 8px 12px;
+            padding: 6px 10px;
             font-weight: bold;
             cursor: pointer;
         }
 
         /* REPORTE */
         .report-summary {
-            font-size: 1.1rem;
-            margin-bottom: 15px;
+            font-size: 1rem;
+            margin-bottom: 12px;
         }
 
         .report-table {
             width: 100%;
             border-collapse: collapse;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .report-table th, .report-table td {
-            padding: 8px;
+            padding: 6px;
             text-align: left;
             border-bottom: 1px solid #333;
         }
@@ -378,10 +384,10 @@
             background: #3a2000;
             border: 1px solid var(--accent-orange);
             color: #ffcc80;
-            padding: 10px;
-            border-radius: 8px;
-            margin-top: 10px;
-            font-size: 0.85rem;
+            padding: 8px;
+            border-radius: 6px;
+            margin-top: 8px;
+            font-size: 0.8rem;
         }
 
         .btn-danger-light {
@@ -391,7 +397,7 @@
             padding: 8px;
             border-radius: 6px;
             width: 100%;
-            margin-top: 15px;
+            margin-top: 10px;
             cursor: pointer;
         }
     </style>
@@ -487,13 +493,13 @@
 
         <div class="card">
             <h3>📦 Stock Actual y Eliminación</h3>
-            <p style="color: var(--text-muted); font-size: 0.85rem; margin-bottom: 15px;">
+            <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 10px;">
                 Modifica el stock o elimina productos de la carta.
             </p>
             <div id="stock-inputs">
                 <!-- Lista de productos con inputs y botón eliminar -->
             </div>
-            <button class="btn-action btn-pay" style="width: 100%; margin-top: 10px;" onclick="saveStockInputs()">Guardar Cambios de Stock</button>
+            <button class="btn-action btn-pay" style="width: 100%; margin-top: 8px;" onclick="saveStockInputs()">Guardar Cambios de Stock</button>
         </div>
     </div>
 
@@ -669,7 +675,7 @@
             grid.innerHTML = '';
 
             if (products.length === 0) {
-                grid.innerHTML = '<p style="color: var(--text-muted); grid-column: span 2; text-align: center; padding: 20px;">No hay productos en la carta. Agrega algunos en la pestaña Inventario.</p>';
+                grid.innerHTML = '<p style="color: var(--text-muted); grid-column: span 3; text-align: center; padding: 20px;">No hay productos en la carta. Agrega algunos en la pestaña Inventario.</p>';
                 return;
             }
 
@@ -680,7 +686,7 @@
                 btn.innerHTML = `
                     <span class="title">${p.name}</span>
                     <span class="price">$${p.price.toLocaleString('es-CL')}</span>
-                    <span class="stock">Disponibles: ${p.stock} u.</span>
+                    <span class="stock">Disp: ${p.stock} u.</span>
                 `;
                 grid.appendChild(btn);
             });
@@ -754,7 +760,7 @@
                     saleTotal += prod.price;
 
                     if (!summary[prod.id]) {
-                        summary[prod.id] = { name: prod.name, qty: 0, price: prod.price };
+                        summary[prod.id] = { name: prod.name, qty: 0 };
                     }
                     summary[prod.id].qty += 1;
                 }
@@ -762,8 +768,7 @@
 
             salesByPayment[selectedPaymentMethod] += saleTotal;
 
-            // Emite la colilla de retiro para CUALQUIER método de pago seleccionado
-            printKitchenReceipt(summary, saleTotal, selectedPaymentMethod);
+            printKitchenReceipt(summary, selectedPaymentMethod);
             ticketCounter += 1;
 
             saveData();
@@ -772,7 +777,7 @@
             renderStockInputs();
         }
 
-        function printKitchenReceipt(summary, total, paymentMethod) {
+        function printKitchenReceipt(summary, paymentMethod) {
             const now = new Date();
             const dateStr = now.toLocaleDateString('es-CL') + ' ' + now.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
             
@@ -785,13 +790,13 @@
             let kitchenItemsHtml = '';
             Object.values(summary).forEach(item => {
                 kitchenItemsHtml += `
-                    <div style="font-size: 14px; font-weight: bold; margin-bottom: 5px;">
+                    <div style="font-size: 15px; font-weight: bold; margin-bottom: 8px; line-height: 1.2;">
                         [ ] ${item.qty} u. - ${item.name}
                     </div>
                 `;
             });
 
-            const printWindow = window.open('', '_blank', 'width=350,height=600');
+            const printWindow = window.open('', '_blank', 'width=300,height=500');
             
             printWindow.document.write(`
                 <!DOCTYPE html>
@@ -800,44 +805,39 @@
                     <title>Colilla de Retiro</title>
                     <style>
                         @page {
-                            size: 80mm auto;
+                            size: 45mm auto;
                             margin: 0;
                         }
                         body {
                             font-family: 'Courier New', Courier, monospace;
-                            width: 72mm;
+                            width: 42mm;
                             margin: 0 auto;
-                            padding: 5px;
+                            padding: 2px;
                             color: #000;
                             background: #fff;
-                            font-size: 11px;
-                            line-height: 1.2;
+                            font-size: 10px;
+                            line-height: 1.15;
                         }
                         .center { text-align: center; }
                         .bold { font-weight: bold; }
-                        .line { border-top: 1px dashed #000; margin: 5px 0; }
-                        .flex { display: flex; justify-content: space-between; }
-                        .box { border: 2px solid #000; padding: 8px; margin-top: 8px; }
+                        .line { border-top: 1px dashed #000; margin: 4px 0; }
+                        .box { border: 1.5px solid #000; padding: 4px; margin-top: 4px; }
                     </style>
                 </head>
                 <body>
                     <div class="center">
-                        <div class="bold" style="font-size: 13px;">FONDA MONTE PATRIA</div>
-                        <div class="bold" style="font-size: 12px; margin-top: 4px;">✂️ COLILLA DE RETIRO N° ${ticketCounter}</div>
-                        <div style="font-size: 10px; margin-top: 2px;">FECHA: ${dateStr}</div>
-                        <div style="font-size: 10px;">PAGO: ${paymentNames[paymentMethod]}</div>
+                        <div class="bold" style="font-size: 11px;">FONDA MONTE PATRIA</div>
+                        <div class="bold" style="font-size: 12px; margin-top: 3px;">✂️ RETIRO N° ${ticketCounter}</div>
+                        <div style="font-size: 9px; margin-top: 2px;">${dateStr}</div>
+                        <div style="font-size: 9px;">PAGO: ${paymentNames[paymentMethod]}</div>
                     </div>
                     <div class="line"></div>
                     <div class="box">
-                        <div class="bold center" style="border-bottom: 1px solid #000; padding-bottom: 3px; margin-bottom: 6px;">ENTREGAR EN BARRA / COCINA</div>
+                        <div class="bold center" style="border-bottom: 1px solid #000; padding-bottom: 2px; margin-bottom: 4px; font-size: 10px;">ENTREGAR EN BARRA</div>
                         ${kitchenItemsHtml}
                     </div>
                     <div class="line"></div>
-                    <div class="flex bold" style="font-size: 12px;">
-                        <span>TOTAL PAGADO:</span>
-                        <span>$${total.toLocaleString('es-CL')}</span>
-                    </div>
-                    <div class="center" style="font-size: 10px; margin-top: 8px;">
+                    <div class="center" style="font-size: 9px; margin-top: 4px;">
                         <div>¡Gracias por su preferencia!</div>
                     </div>
                     <script>
