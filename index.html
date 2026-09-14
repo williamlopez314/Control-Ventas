@@ -542,11 +542,11 @@
             <div id="shopping-recommendations"></div>
         </div>
 
-        <button class="btn-danger-light" onclick="resetAllData()">⚠️ Reiniciar Todos los Datos de la Fonda</button>
+        <button class="btn-danger-light" onclick="resetAllData()">⚠️ Reiniciar Solo Contadores de Ventas</button>
     </div>
 
     <script>
-        // CONFIGURACIÓN DE FIREBASE (Con tus credenciales actuales)
+        // CONFIGURACIÓN DE FIREBASE
         const firebaseConfig = {
             apiKey: "AIzaSyCrM02lVgvbc_OAJSuJkpd4MiNQ38ubJWY",
             authDomain: "ventaspos-24c0b.firebaseapp.com",
@@ -939,8 +939,11 @@
         }
 
         function resetAllData() {
-            if (confirm('¿Reiniciar todos los datos y ventas en todos los dispositivos?')) {
-                products = JSON.parse(JSON.stringify(defaultProducts));
+            if (confirm('¿Reiniciar las ventas y dejar en cero los contadores? (Los productos y su inventario actual se mantendrán)')) {
+                // Reinicia las unidades vendidas de cada producto a 0, sin tocar su stock ni borrarlos
+                products.forEach(p => {
+                    p.sold = 0;
+                });
                 salesByPayment = { cash: 0, card: 0, transfer: 0 };
                 ticketCounter = 1;
                 saveDataToCloud();
