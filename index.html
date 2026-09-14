@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>POS Fonda Monte Patria 2026</title>
+    
+    <!-- Firebase SDKs (Compat v9) -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore-compat.js"></script>
+
     <style>
         :root {
             --bg-color: #121212;
@@ -31,6 +36,17 @@
             padding: 8px;
             max-width: 600px;
             margin: 0 auto;
+        }
+
+        /* Indicador de Estado de Conexión */
+        .sync-status {
+            font-size: 0.65rem;
+            text-align: right;
+            color: var(--accent-orange);
+            margin-bottom: 4px;
+        }
+        .sync-status.online {
+            color: var(--accent-green);
         }
 
         /* Navegación por Pestañas */
@@ -161,7 +177,7 @@
             border-color: var(--accent-blue);
         }
 
-        /* Grilla de Botones en 4 Columnas (Modificado) */
+        /* Grilla de Botones en 4 Columnas */
         .product-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
@@ -403,6 +419,8 @@
 </head>
 <body>
 
+    <div id="sync-indicator" class="sync-status">🔄 Conectando a la nube...</div>
+
     <!-- Navegación -->
     <div class="tabs">
         <button class="tab-btn active" onclick="switchTab('pos', event)">📱 Venta (POS)</button>
@@ -441,7 +459,7 @@
         </div>
 
         <div id="product-buttons" class="product-grid">
-            <!-- Botones dinámicos creados desde el Inventario -->
+            <!-- Botones dinámicos -->
         </div>
 
         <div class="action-grid">
@@ -487,17 +505,15 @@
                     <input type="number" id="new-prod-stock" placeholder="50" min="0">
                 </div>
             </div>
-            <button class="btn-action btn-pay" style="width: 100%;" onclick="addNewProduct()">Crear Producto y Botón POS</button>
+            <button class="btn-action btn-pay" style="width: 100%;" onclick="addNewProduct()">Crear Producto y Sincronizar</button>
         </div>
 
         <div class="card">
             <h3>📦 Modificar Carta (Nombre, Precio y Stock)</h3>
             <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 10px;">
-                Edita los campos directamente y presiona guardar cambios.
+                Edita los campos y guarda los cambios para reflejarlos en todos los dispositivos.
             </p>
-            <div id="stock-inputs">
-                <!-- Lista editable de productos -->
-            </div>
+            <div id="stock-inputs"></div>
             <button class="btn-action btn-pay" style="width: 100%; margin-top: 8px;" onclick="saveStockInputs()">Guardar Cambios de la Carta</button>
         </div>
     </div>
@@ -517,23 +533,32 @@
                         <th>Quedan</th>
                     </tr>
                 </thead>
-                <tbody id="report-body">
-                    <!-- Filas dinámicas -->
-                </tbody>
+                <tbody id="report-body"></tbody>
             </table>
         </div>
 
         <div class="card">
             <h3>Sugerencia de Compras (Mañana)</h3>
-            <div id="shopping-recommendations">
-                <!-- Diagnóstico automático -->
-            </div>
+            <div id="shopping-recommendations"></div>
         </div>
 
         <button class="btn-danger-light" onclick="resetAllData()">⚠️ Reiniciar Todos los Datos de la Fonda</button>
     </div>
 
     <script>
+        // CONFIGURACIÓN DE FIREBASE (Con tus credenciales actuales)
+        const firebaseConfig = {
+            apiKey: "AIzaSyCrM02lVgvbc_OAJSuJkpd4MiNQ38ubJWY",
+            authDomain: "ventaspos-24c0b.firebaseapp.com",
+            projectId: "ventaspos-24c0b",
+            storageBucket: "ventaspos-24c0b.firebasestorage.app",
+            messagingSenderId: "252812687889",
+            appId: "1:252812687889:web:1c3f52dc9ba4c819c24fb0"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
         const defaultProducts = [
             { id: 'terremoto', name: 'Terremoto', price: 4000, stock: 50, sold: 0 },
             { id: 'piscola', name: 'Piscola / Destilado', price: 4500, stock: 40, sold: 0 },
@@ -543,46 +568,46 @@
 
         let products = [];
         let currentCart = [];
-
-        let salesByPayment = {
-            cash: 0,
-            card: 0,
-            transfer: 0
-        };
-
+        let salesByPayment = { cash: 0, card: 0, transfer: 0 };
         let selectedPaymentMethod = 'cash';
         let ticketCounter = 1;
 
         function initApp() {
-            const savedData = localStorage.getItem('fonda_pos_data');
-            if (savedData) {
-                products = JSON.parse(savedData);
-            } else {
-                products = JSON.parse(JSON.stringify(defaultProducts));
-            }
+            // Escuchar cambios en tiempo real desde Firestore
+            db.collection("fonda").doc("estado_actual").onSnapshot((doc) => {
+                const indicator = document.getElementById('sync-indicator');
+                indicator.innerText = "🟢 Sincronizado en tiempo real";
+                indicator.classList.add('online');
 
-            const savedPaymentSales = localStorage.getItem('fonda_pos_payments');
-            if (savedPaymentSales) {
-                salesByPayment = JSON.parse(savedPaymentSales);
-            }
+                if (doc.exists) {
+                    const data = doc.data();
+                    products = data.products || defaultProducts;
+                    salesByPayment = data.salesByPayment || { cash: 0, card: 0, transfer: 0 };
+                    ticketCounter = data.ticketCounter || 1;
+                } else {
+                    products = JSON.parse(JSON.stringify(defaultProducts));
+                    saveDataToCloud();
+                }
 
-            const savedTicketCounter = localStorage.getItem('fonda_ticket_counter');
-            if (savedTicketCounter) {
-                ticketCounter = parseInt(savedTicketCounter) || 1;
-            }
-
-            saveData();
-            updateDailySummary();
-            renderPOS();
-            renderStockInputs();
-            renderReport();
+                updateDailySummary();
+                renderPOS();
+                renderStockInputs();
+                renderReport();
+            }, (error) => {
+                const indicator = document.getElementById('sync-indicator');
+                indicator.innerText = "🔴 Error de conexión con la nube";
+                console.error("Error al sincronizar:", error);
+            });
         }
 
-        function saveData() {
-            localStorage.setItem('fonda_pos_data', JSON.stringify(products));
-            localStorage.setItem('fonda_pos_payments', JSON.stringify(salesByPayment));
-            localStorage.setItem('fonda_ticket_counter', ticketCounter);
-            updateDailySummary();
+        function saveDataToCloud() {
+            db.collection("fonda").doc("estado_actual").set({
+                products: products,
+                salesByPayment: salesByPayment,
+                ticketCounter: ticketCounter
+            }).catch((error) => {
+                console.error("Error al guardar en la nube: ", error);
+            });
         }
 
         function setPaymentMethod(method) {
@@ -636,7 +661,6 @@
             }
 
             const newId = 'prod_' + Date.now();
-
             const newProduct = {
                 id: newId,
                 name: name,
@@ -646,28 +670,23 @@
             };
 
             products.push(newProduct);
-            saveData();
+            saveDataToCloud();
 
             nameInput.value = '';
             priceInput.value = '';
             stockInput.value = '';
 
-            renderPOS();
-            renderStockInputs();
-            alert(`✅ ¡Producto "${name}" agregado correctamente!`);
+            alert(`✅ ¡Producto "${name}" agregado y sincronizado con todos los dispositivos!`);
         }
 
         function deleteProduct(prodId) {
             const prod = products.find(p => p.id === prodId);
             if (!prod) return;
 
-            if (confirm(`¿Eliminar "${prod.name}" de la oferta y borrar su botón de venta?`)) {
+            if (confirm(`¿Eliminar "${prod.name}" de la oferta en todos los dispositivos?`)) {
                 products = products.filter(p => p.id !== prodId);
                 currentCart = currentCart.filter(item => item.id !== prodId);
-                
-                saveData();
-                renderPOS();
-                renderStockInputs();
+                saveDataToCloud();
                 updateCartDisplay();
             }
         }
@@ -677,7 +696,7 @@
             grid.innerHTML = '';
 
             if (products.length === 0) {
-                grid.innerHTML = '<p style="color: var(--text-muted); grid-column: span 4; text-align: center; padding: 20px;">No hay productos en la carta. Agrega algunos en la pestaña Inventario.</p>';
+                grid.innerHTML = '<p style="color: var(--text-muted); grid-column: span 4; text-align: center; padding: 20px;">No hay productos en la carta.</p>';
                 return;
             }
 
@@ -773,21 +792,15 @@
             printKitchenReceipt(summary, selectedPaymentMethod);
             ticketCounter += 1;
 
-            saveData();
+            saveDataToCloud();
             clearCurrentSale();
-            renderPOS();
-            renderStockInputs();
         }
 
         function printKitchenReceipt(summary, paymentMethod) {
             const now = new Date();
             const dateStr = now.toLocaleDateString('es-CL') + ' ' + now.toLocaleTimeString('es-CL', { hour: '2-digit', minute: '2-digit' });
             
-            const paymentNames = {
-                cash: 'EFECTIVO',
-                card: 'TARJETA',
-                transfer: 'TRANSFERENCIA'
-            };
+            const paymentNames = { cash: 'EFECTIVO', card: 'TARJETA', transfer: 'TRANSFERENCIA' };
 
             let kitchenItemsHtml = '';
             Object.values(summary).forEach(item => {
@@ -799,27 +812,14 @@
             });
 
             const printWindow = window.open('', '_blank', 'width=300,height=500');
-            
             printWindow.document.write(`
                 <!DOCTYPE html>
                 <html>
                 <head>
                     <title>Colilla de Retiro</title>
                     <style>
-                        @page {
-                            size: 45mm auto;
-                            margin: 0;
-                        }
-                        body {
-                            font-family: 'Courier New', Courier, monospace;
-                            width: 42mm;
-                            margin: 0 auto;
-                            padding: 2px;
-                            color: #000;
-                            background: #fff;
-                            font-size: 10px;
-                            line-height: 1.15;
-                        }
+                        @page { size: 45mm auto; margin: 0; }
+                        body { font-family: 'Courier New', Courier, monospace; width: 42mm; margin: 0 auto; padding: 2px; color: #000; background: #fff; font-size: 10px; line-height: 1.15; }
                         .center { text-align: center; }
                         .bold { font-weight: bold; }
                         .line { border-top: 1px dashed #000; margin: 4px 0; }
@@ -843,10 +843,7 @@
                         <div>¡Gracias por su preferencia!</div>
                     </div>
                     <script>
-                        window.onload = function() {
-                            window.print();
-                            setTimeout(() => { window.close(); }, 500);
-                        }
+                        window.onload = function() { window.print(); setTimeout(() => { window.close(); }, 500); }
                     <\/script>
                 </body>
                 </html>
@@ -895,10 +892,8 @@
                     if (!isNaN(newStock) && newStock >= 0) p.stock = newStock;
                 }
             });
-            saveData();
-            renderPOS();
-            renderStockInputs();
-            alert('📦 Cambios de la carta y stock guardados correctamente');
+            saveDataToCloud();
+            alert('📦 Cambios guardados y sincronizados en la nube');
         }
 
         function renderReport() {
@@ -932,11 +927,11 @@
             totalRevEl.innerText = `$${totalRevenue.toLocaleString('es-CL')}`;
 
             if (criticalStockItems.length === 0) {
-                recContainer.innerHTML = '<p style="color: var(--accent-green);">✅ Stock suficiente en todos los productos para continuar.</p>';
+                recContainer.innerHTML = '<p style="color: var(--accent-green);">✅ Stock suficiente en todos los productos.</p>';
             } else {
-                let html = '<div class="alert-box"><strong>⚡ Reposición recomendada para la siguiente jornada:</strong><ul style="margin-left: 15px; margin-top: 5px;">';
+                let html = '<div class="alert-box"><strong>⚡ Reposición recomendada:</strong><ul style="margin-left: 15px; margin-top: 5px;">';
                 criticalStockItems.forEach(item => {
-                    html += `<li><strong>${item.name}:</strong> Quedan ${item.stock} u. Se han vendido ${item.sold} u.</li>`;
+                    html += `<li><strong>${item.name}:</strong> Quedan ${item.stock} u. Vendidos: ${item.sold} u.</li>`;
                 });
                 html += '</ul></div>';
                 recContainer.innerHTML = html;
@@ -944,12 +939,11 @@
         }
 
         function resetAllData() {
-            if (confirm('¿Estás seguro de reiniciar todos los datos? Esto borrará las ventas, contadores y el inventario.')) {
-                localStorage.removeItem('fonda_pos_data');
-                localStorage.removeItem('fonda_pos_payments');
-                localStorage.removeItem('fonda_ticket_counter');
+            if (confirm('¿Reiniciar todos los datos y ventas en todos los dispositivos?')) {
+                products = JSON.parse(JSON.stringify(defaultProducts));
                 salesByPayment = { cash: 0, card: 0, transfer: 0 };
                 ticketCounter = 1;
+                saveDataToCloud();
                 initApp();
             }
         }
