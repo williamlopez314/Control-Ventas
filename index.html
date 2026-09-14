@@ -349,7 +349,7 @@
 
         .stock-edit-grid {
             display: grid;
-            grid-template-columns: 2fr 1fr 1fr auto;
+            grid-template-columns: 2fr 1fr 1fr auto auto auto;
             gap: 6px;
             align-items: center;
         }
@@ -361,6 +361,19 @@
             background: #121212;
             color: white;
             font-size: 0.85rem;
+        }
+
+        .btn-order {
+            background: #333;
+            color: white;
+            border: 1px solid #555;
+            border-radius: 6px;
+            padding: 6px 8px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        .btn-order:active {
+            background: #555;
         }
 
         .btn-delete-prod {
@@ -509,9 +522,9 @@
         </div>
 
         <div class="card">
-            <h3>📦 Modificar Carta (Nombre, Precio y Stock)</h3>
+            <h3>📦 Modificar Carta y Orden de Visualización</h3>
             <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 10px;">
-                Edita los campos y guarda los cambios para reflejarlos en todos los dispositivos.
+                Usa las flechas 🔼 y 🔽 para ordenar cómo aparecen los botones en la pantalla de ventas.
             </p>
             <div id="stock-inputs"></div>
             <button class="btn-action btn-pay" style="width: 100%; margin-top: 8px;" onclick="saveStockInputs()">Guardar Cambios de la Carta</button>
@@ -573,7 +586,6 @@
         let ticketCounter = 1;
 
         function initApp() {
-            // Escuchar cambios en tiempo real desde Firestore
             db.collection("fonda").doc("estado_actual").onSnapshot((doc) => {
                 const indicator = document.getElementById('sync-indicator');
                 indicator.innerText = "🟢 Sincronizado en tiempo real";
@@ -646,6 +658,38 @@
             if(tabId === 'stock') renderStockInputs();
         }
 
+        function moveProduct(index, direction) {
+            const newIndex = index + direction;
+            if (newIndex < 0 || newIndex >= products.length) return;
+            
+            // Recoger valores actuales de los inputs antes de mover para no perder lo escrito sin guardar
+            syncInputsToMemory();
+
+            const temp = products[index];
+            products[index] = products[newIndex];
+            products[newIndex] = temp;
+
+            renderStockInputs();
+        }
+
+        function syncInputsToMemory() {
+            products.forEach(p => {
+                const nameInput = document.getElementById(`edit-name-${p.id}`);
+                const priceInput = document.getElementById(`edit-price-${p.id}`);
+                const stockInput = document.getElementById(`edit-stock-${p.id}`);
+
+                if (nameInput && priceInput && stockInput) {
+                    const newName = nameInput.value.trim();
+                    const newPrice = parseInt(priceInput.value);
+                    const newStock = parseInt(stockInput.value);
+
+                    if (newName) p.name = newName;
+                    if (!isNaN(newPrice) && newPrice >= 0) p.price = newPrice;
+                    if (!isNaN(newStock) && newStock >= 0) p.stock = newStock;
+                }
+            });
+        }
+
         function addNewProduct() {
             const nameInput = document.getElementById('new-prod-name');
             const priceInput = document.getElementById('new-prod-price');
@@ -676,7 +720,7 @@
             priceInput.value = '';
             stockInput.value = '';
 
-            alert(`✅ ¡Producto "${name}" agregado y sincronizado con todos los dispositivos!`);
+            alert(`✅ ¡Producto "${name}" agregado y sincronizado!`);
         }
 
         function deleteProduct(prodId) {
@@ -860,15 +904,19 @@
                 return;
             }
 
-            products.forEach(p => {
+            products.forEach((p, index) => {
                 const row = document.createElement('div');
                 row.className = 'stock-input-row';
                 row.innerHTML = `
-                    <div style="font-size: 0.75rem; color: var(--text-muted);">ID: ${p.id}</div>
+                    <div style="display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted);">
+                        <span>Posición: ${index + 1} (ID: ${p.id})</span>
+                    </div>
                     <div class="stock-edit-grid">
                         <input type="text" id="edit-name-${p.id}" value="${p.name}" placeholder="Nombre">
                         <input type="number" id="edit-price-${p.id}" value="${p.price}" placeholder="Precio" min="0">
                         <input type="number" id="edit-stock-${p.id}" value="${p.stock}" placeholder="Stock" min="0">
+                        <button class="btn-order" onclick="moveProduct(${index}, -1)" ${index === 0 ? 'disabled style="opacity:0.3"' : ''} title="Subir">🔼</button>
+                        <button class="btn-order" onclick="moveProduct(${index}, 1)" ${index === products.length - 1 ? 'disabled style="opacity:0.3"' : ''} title="Bajar">🔽</button>
                         <button class="btn-delete-prod" onclick="deleteProduct('${p.id}')" title="Eliminar producto">🗑️</button>
                     </div>
                 `;
@@ -877,23 +925,9 @@
         }
 
         function saveStockInputs() {
-            products.forEach(p => {
-                const nameInput = document.getElementById(`edit-name-${p.id}`);
-                const priceInput = document.getElementById(`edit-price-${p.id}`);
-                const stockInput = document.getElementById(`edit-stock-${p.id}`);
-
-                if (nameInput && priceInput && stockInput) {
-                    const newName = nameInput.value.trim();
-                    const newPrice = parseInt(priceInput.value);
-                    const newStock = parseInt(stockInput.value);
-
-                    if (newName) p.name = newName;
-                    if (!isNaN(newPrice) && newPrice >= 0) p.price = newPrice;
-                    if (!isNaN(newStock) && newStock >= 0) p.stock = newStock;
-                }
-            });
+            syncInputsToMemory();
             saveDataToCloud();
-            alert('📦 Cambios guardados y sincronizados en la nube');
+            alert('📦 Orden y cambios guardados y sincronizados en la nube');
         }
 
         function renderReport() {
@@ -940,7 +974,6 @@
 
         function resetAllData() {
             if (confirm('¿Reiniciar las ventas y dejar en cero los contadores? (Los productos y su inventario actual se mantendrán)')) {
-                // Reinicia las unidades vendidas de cada producto a 0, sin tocar su stock ni borrarlos
                 products.forEach(p => {
                     p.sold = 0;
                 });
