@@ -161,26 +161,26 @@
             border-color: var(--accent-blue);
         }
 
-        /* Grilla de Botones en 3 Columnas */
+        /* Grilla de Botones en 4 Columnas (Modificado) */
         .product-grid {
             display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 8px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
             margin-bottom: 8px;
         }
 
         .btn-prod {
             background: var(--card-bg);
             border: 1px solid #444;
-            border-radius: 10px;
-            padding: 10px 6px;
+            border-radius: 8px;
+            padding: 8px 4px;
             color: white;
             text-align: left;
             cursor: pointer;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            min-height: 80px;
+            min-height: 85px;
         }
 
         .btn-prod:active {
@@ -190,8 +190,8 @@
 
         .btn-prod .title {
             font-weight: bold;
-            font-size: 0.9rem;
-            line-height: 1.15;
+            font-size: 0.8rem;
+            line-height: 1.1;
             display: -webkit-box;
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
@@ -201,12 +201,12 @@
         .btn-prod .price {
             color: var(--accent-green);
             font-weight: bold;
-            font-size: 0.9rem;
-            margin-top: 4px;
+            font-size: 0.8rem;
+            margin-top: 2px;
         }
 
         .btn-prod .stock {
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             color: var(--text-muted);
         }
 
@@ -324,28 +324,27 @@
 
         .stock-input-row {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 10px;
-            padding-bottom: 6px;
+            flex-direction: column;
+            gap: 6px;
+            margin-bottom: 12px;
+            padding-bottom: 10px;
             border-bottom: 1px solid #2a2a2a;
         }
 
-        .stock-controls {
-            display: flex;
+        .stock-edit-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 6px;
             align-items: center;
-            gap: 8px;
         }
 
-        .stock-controls input {
-            width: 60px;
+        .stock-edit-grid input {
             padding: 6px;
             border-radius: 6px;
             border: 1px solid #444;
             background: #121212;
             color: white;
-            text-align: center;
-            font-size: 0.9rem;
+            font-size: 0.85rem;
         }
 
         .btn-delete-prod {
@@ -353,7 +352,7 @@
             color: white;
             border: none;
             border-radius: 6px;
-            padding: 6px 10px;
+            padding: 8px 10px;
             font-weight: bold;
             cursor: pointer;
         }
@@ -406,9 +405,9 @@
 
     <!-- Navegación -->
     <div class="tabs">
-        <button class="tab-btn active" onclick="switchTab('pos')">📱 Venta (POS)</button>
-        <button class="tab-btn" onclick="switchTab('stock')">📦 Inventario</button>
-        <button class="tab-btn" onclick="switchTab('report')">📊 Reporte</button>
+        <button class="tab-btn active" onclick="switchTab('pos', event)">📱 Venta (POS)</button>
+        <button class="tab-btn" onclick="switchTab('stock', event)">📦 Inventario</button>
+        <button class="tab-btn" onclick="switchTab('report', event)">📊 Reporte</button>
     </div>
 
     <!-- PESTAÑA 1: CALCULADORA DE VENTAS -->
@@ -492,14 +491,14 @@
         </div>
 
         <div class="card">
-            <h3>📦 Stock Actual y Eliminación</h3>
+            <h3>📦 Modificar Carta (Nombre, Precio y Stock)</h3>
             <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 10px;">
-                Modifica el stock o elimina productos de la carta.
+                Edita los campos directamente y presiona guardar cambios.
             </p>
             <div id="stock-inputs">
-                <!-- Lista de productos con inputs y botón eliminar -->
+                <!-- Lista editable de productos -->
             </div>
-            <button class="btn-action btn-pay" style="width: 100%; margin-top: 8px;" onclick="saveStockInputs()">Guardar Cambios de Stock</button>
+            <button class="btn-action btn-pay" style="width: 100%; margin-top: 8px;" onclick="saveStockInputs()">Guardar Cambios de la Carta</button>
         </div>
     </div>
 
@@ -609,14 +608,17 @@
             document.getElementById('breakdown-transfer').innerText = `$${salesByPayment.transfer.toLocaleString('es-CL')}`;
         }
 
-        function switchTab(tabId) {
+        function switchTab(tabId, event) {
             document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
             document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
             
-            event.target.classList.add('active');
+            if (event && event.target) {
+                event.target.classList.add('active');
+            }
             document.getElementById(`tab-${tabId}`).classList.add('active');
 
             if(tabId === 'report') renderReport();
+            if(tabId === 'stock') renderStockInputs();
         }
 
         function addNewProduct() {
@@ -675,7 +677,7 @@
             grid.innerHTML = '';
 
             if (products.length === 0) {
-                grid.innerHTML = '<p style="color: var(--text-muted); grid-column: span 3; text-align: center; padding: 20px;">No hay productos en la carta. Agrega algunos en la pestaña Inventario.</p>';
+                grid.innerHTML = '<p style="color: var(--text-muted); grid-column: span 4; text-align: center; padding: 20px;">No hay productos en la carta. Agrega algunos en la pestaña Inventario.</p>';
                 return;
             }
 
@@ -865,13 +867,12 @@
                 const row = document.createElement('div');
                 row.className = 'stock-input-row';
                 row.innerHTML = `
-                    <div>
-                        <strong>${p.name}</strong>
-                        <div style="font-size: 0.8rem; color: var(--text-muted);">$${p.price.toLocaleString('es-CL')}</div>
-                    </div>
-                    <div class="stock-controls">
-                        <input type="number" id="input-stock-${p.id}" value="${p.stock}" min="0">
-                        <button class="btn-delete-prod" onclick="deleteProduct('${p.id}')">🗑️</button>
+                    <div style="font-size: 0.75rem; color: var(--text-muted);">ID: ${p.id}</div>
+                    <div class="stock-edit-grid">
+                        <input type="text" id="edit-name-${p.id}" value="${p.name}" placeholder="Nombre">
+                        <input type="number" id="edit-price-${p.id}" value="${p.price}" placeholder="Precio" min="0">
+                        <input type="number" id="edit-stock-${p.id}" value="${p.stock}" placeholder="Stock" min="0">
+                        <button class="btn-delete-prod" onclick="deleteProduct('${p.id}')" title="Eliminar producto">🗑️</button>
                     </div>
                 `;
                 container.appendChild(row);
@@ -880,14 +881,24 @@
 
         function saveStockInputs() {
             products.forEach(p => {
-                const input = document.getElementById(`input-stock-${p.id}`);
-                if (input) {
-                    p.stock = parseInt(input.value) || 0;
+                const nameInput = document.getElementById(`edit-name-${p.id}`);
+                const priceInput = document.getElementById(`edit-price-${p.id}`);
+                const stockInput = document.getElementById(`edit-stock-${p.id}`);
+
+                if (nameInput && priceInput && stockInput) {
+                    const newName = nameInput.value.trim();
+                    const newPrice = parseInt(priceInput.value);
+                    const newStock = parseInt(stockInput.value);
+
+                    if (newName) p.name = newName;
+                    if (!isNaN(newPrice) && newPrice >= 0) p.price = newPrice;
+                    if (!isNaN(newStock) && newStock >= 0) p.stock = newStock;
                 }
             });
             saveData();
             renderPOS();
-            alert('📦 Stock actualizado correctamente');
+            renderStockInputs();
+            alert('📦 Cambios de la carta y stock guardados correctamente');
         }
 
         function renderReport() {
